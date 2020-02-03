@@ -21,7 +21,7 @@ static void displaySatMap() {
   }
   else {
     // Read magnetometer
-    if (current_millis - last_millis >= 250) {
+    if (current_millis - last_millis >= 20) {
       sensors_event_t event;
       mag.getEvent(&event);
 

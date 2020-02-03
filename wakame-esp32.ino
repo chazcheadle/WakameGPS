@@ -122,10 +122,10 @@ unsigned long current_millis;
 unsigned long last_millis = 0;
 
 /***** BUTTONS *****/
-const int buttonOne = 12;              // Uses HW Serial TX pin
+const int buttonOne = 32;              // Uses HW Serial TX pin
 int buttonOne_state;                  // the current reading from the input pin
 int buttonOne_lastState = HIGH;           // the previous reading from the input pin
-const int buttonTwo = 13;              // Uses HW Serial TX pin
+const int buttonTwo = 14;              // Uses HW Serial TX pin
 int buttonTwo_state;                  // the current reading from the input pin
 int buttonTwo_lastState = HIGH;           // the previous reading from the input pin
 unsigned long lastDebounceTime = 0;   // the last time the output pin was toggled
