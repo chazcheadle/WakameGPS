@@ -19,6 +19,7 @@
 #include <ESPmDNS.h>
 #include <WiFiUdp.h>
 #include <DNSServer.h>
+#include <ESP_WiFiManager.h>
 #include "FS.h"
 #include "SD.h"
 #include <ArduinoOTA.h>
@@ -169,18 +170,19 @@ bool logging = false;
 // #define ESP_getChipId() (ESP.getEfuseMac())
 
 // SSID and PW for Config Portal
-String ssid = "ESP32_GPS";
+String ssid = "ESP_" + String((uint32_t)ESP.getEfuseMac(), HEX);
+// String ssid = "ESP32_GPS";
 const char* password = "password";
 
 // SSID and PW for your Router
 String Router_SSID;
 String Router_Pass;
 
-#include <ESP_WiFiManager.h>
 
 char hostString[16] = {0};
 char hostIP[16];
-ESP_WiFiManager ESP_wifiManager;
+// ESP_WiFiManager ESP_wifiManager;
+
 // General-purpose text buffer used in formatting.
 char buf[32];
 
@@ -229,27 +231,6 @@ DEBUG_PORT.println(F("Init."));
     tft.setCursor(1, 119);
     tft.print("No magnetometer");
   }
-  // else {
-  //   sensors_event_t event;
-  //   mag.getEvent(&event);
-
-  //   float heading = atan2(event.magnetic.y, event.magnetic.x);
-  //   float declinationAngle = 0.22;
-  //   heading += declinationAngle;
-  //   tft.setCursor(1, 119);
-  //   // Correct for when signs are reversed.
-  //   if(heading < 0)
-  //     heading += 2*PI;
-
-  //   // Check for wrap due to addition of declination.
-  //   if(heading > 2*PI)
-  //     heading -= 2*PI;
-
-  //   // Convert radians to degrees for readability.
-  //   headingDegrees = heading * 180/M_PI;
-  //   tft.print(headingDegrees);
-
-  // }
 
   // Initialize BME280 sensor
   unsigned bmeStatus;
@@ -260,84 +241,94 @@ DEBUG_PORT.println(F("Init."));
     tft.print(F("BME Fail"));
   }
 
-  // if (digitalRead(buttonOne) == LOW && digitalRead(buttonTwo) == LOW) {
-  //   Router_SSID = ESP_wifiManager.WiFi_SSID();
-  //   Router_Pass = ESP_wifiManager.WiFi_Pass();
-  //   tft.setTextColor(ST7735_WHITE, ST7735_BLACK);
-  //   tft.setCursor(1, 120);
-  //   tft.print("Starting WiFi...");
-  //   digitalWrite(LED, LOW);
-  //   delay(2000);
-  //   WiFi.mode(WIFI_STA);
-  //   WiFi.begin(Router_SSID.c_str(), Router_Pass.c_str());
-  //   delay(5000);
-  //   if (WiFi.waitForConnectResult() != WL_CONNECTED) {  
-  //     // DEBUG_PORT.println("Connection Failed! Rebooting...");
-  //     tft.setCursor(1, 120);
-  //     tft.print("Cannot connect to WiFi");
-  //     tft.setCursor(114, 120);
-  //     tft.print(" ");
-  //     // ESP.restart();
-  //   }
-  //   else {
-  //     tft.fillRect(0, 120, 127, 7, ST7735_BLACK);
-  //     tft.setCursor(114, 2);
-  //     tft.setTextColor(ST7735_BLACK, ST7735_WHITE);
-  //     tft.print("W");
-  //     tft.setTextColor(ST7735_WHITE, ST7735_BLACK);
-  //   }
-  //   // Set mDNS hostname
-  //   sprintf(hostString, "ESP-%06X", ESP.getChipId());
-  //   if (!MDNS.begin(hostString)) {
-  //     tft.setCursor(1, 119);
-  //     tft.print(F("mDNS failed"));
-  //   }
-  //   sprintf(hostIP, "%d.%d.%d.%d", WiFi.localIP()[0], WiFi.localIP()[1], WiFi.localIP()[2], WiFi.localIP()[3] );
-  //   digitalWrite(LED, LOW);
-  //   delay(20);
-  //   digitalWrite(LED, HIGH);
-  //   delay(20);
-  //   digitalWrite(LED, LOW);
-  //   delay(20);
-  //   digitalWrite(LED, HIGH);
-  //   delay(20);
-  //   ArduinoOTA.onStart([]() {
-  //     // DEBUG_PORT.println("Start");
-  //     digitalWrite(LED, LOW);
-  //     tft.setTextColor(ST7735_WHITE, ST7735_BLACK);
-  //     tft.setCursor(2, 120);
-  //     tft.print(F("Updating firmware: "));
-  //     });
-  //   ArduinoOTA.onEnd([]() {
-  //     // DEBUG_PORT.println("\nEnd");
-  //     tft.fillRect(0, 120, 127, 7, ST7735_BLACK);
-  //     tft.setTextColor(ST7735_WHITE, ST7735_BLACK);
-  //     tft.setCursor(2, 120);
-  //     tft.print(F("Firmware updated."));
-  //     digitalWrite(LED, HIGH);
-  //   });
-  //   ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {
-  //     // DEBUG_PORT.printf("Progress: %u%%\r", (progress / (total / 100)));
-  //     tft.setCursor(104, 120);
-  //     tft.print(progress / (total / 100));
-  //     tft.print(F("% "));
-  //   });
-  //   ArduinoOTA.onError([](ota_error_t error) {
-  //     // DEBUG_PORT.printf("Error[%u]: ", error);
-  //     if (error == OTA_AUTH_ERROR) DEBUG_PORT.println("Auth Failed");
-  //     else if (error == OTA_BEGIN_ERROR) DEBUG_PORT.println("Begin Failed");
-  //     else if (error == OTA_CONNECT_ERROR) DEBUG_PORT.println("Connect Failed");
-  //     else if (error == OTA_RECEIVE_ERROR) DEBUG_PORT.println("Receive Failed");
-  //     else if (error == OTA_END_ERROR) DEBUG_PORT.println("End Failed");
-  //   });
-  //   ArduinoOTA.begin();
-  // }
-  // else {
-  //   // Put modem to sleep
-  //   WiFi.mode( WIFI_OFF );
-  //   WiFi.forceSleepBegin();
-  //   delay( 1 );
-  // }
+  // ESP_WiFiManager ESP_wifiManager((const char *) ssid.c_str());
+
+  // ESP_WiFiManager ESP_wifiManager;
+  // Router_SSID = ESP_wifiManager.WiFi_SSID();
+  // Router_Pass = ESP_wifiManager.WiFi_Pass();
+
+  if (digitalRead(buttonOne) == LOW || digitalRead(buttonTwo) == LOW) {
+    // Router_SSID = ESP_wifiManager.WiFi_SSID();
+    // Router_Pass = ESP_wifiManager.WiFi_Pass();
+    Router_SSID = "NETGEAR67";
+    Router_Pass = "yellowriver661";
+
+    tft.setTextColor(ST7735_WHITE, ST7735_BLACK);
+    tft.setCursor(1, 120);
+    tft.print("Starting WiFi...");
+    digitalWrite(LED, LOW);
+    delay(2000);
+    WiFi.mode(WIFI_STA);
+    WiFi.begin(Router_SSID.c_str(), Router_Pass.c_str());
+    delay(5000);
+    if (WiFi.waitForConnectResult() != WL_CONNECTED) {  
+      // DEBUG_PORT.println("Connection Failed! Rebooting...");
+      tft.setCursor(1, 120);
+      tft.print("Cannot connect to WiFi");
+      tft.setCursor(114, 120);
+      tft.print(" ");
+      // ESP.restart();
+    }
+    else {
+      tft.fillRect(0, 120, 127, 7, ST7735_BLACK);
+      tft.setCursor(114, 2);
+      tft.setTextColor(ST7735_BLACK, ST7735_WHITE);
+      tft.print("W");
+      tft.setTextColor(ST7735_WHITE, ST7735_BLACK);
+    }
+    // Set mDNS hostname
+    // sprintf(hostString, "ESP-%06X", (const char *) ssid.c_str());
+    tft.setCursor(1, 119);
+    tft.print(ssid.c_str());
+    if (!MDNS.begin(ssid.c_str())) {
+      tft.setCursor(1, 119);
+      tft.print(F("mDNS failed"));
+    }
+    sprintf(hostIP, "%d.%d.%d.%d", WiFi.localIP()[0], WiFi.localIP()[1], WiFi.localIP()[2], WiFi.localIP()[3] );
+    digitalWrite(LED, LOW);
+    delay(20);
+    digitalWrite(LED, HIGH);
+    delay(20);
+    digitalWrite(LED, LOW);
+    delay(20);
+    digitalWrite(LED, HIGH);
+    delay(20);
+    ArduinoOTA.onStart([]() {
+      // DEBUG_PORT.println("Start");
+      digitalWrite(LED, LOW);
+      tft.setTextColor(ST7735_WHITE, ST7735_BLACK);
+      tft.setCursor(2, 120);
+      tft.print(F("Updating firmware: "));
+      });
+    ArduinoOTA.onEnd([]() {
+      // DEBUG_PORT.println("\nEnd");
+      tft.fillRect(0, 120, 127, 7, ST7735_BLACK);
+      tft.setTextColor(ST7735_WHITE, ST7735_BLACK);
+      tft.setCursor(2, 120);
+      tft.print(F("Firmware updated."));
+      digitalWrite(LED, HIGH);
+    });
+    ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {
+      // DEBUG_PORT.printf("Progress: %u%%\r", (progress / (total / 100)));
+      tft.setCursor(104, 120);
+      tft.print(progress / (total / 100));
+      tft.print(F("% "));
+    });
+    ArduinoOTA.onError([](ota_error_t error) {
+      // DEBUG_PORT.printf("Error[%u]: ", error);
+      if (error == OTA_AUTH_ERROR) DEBUG_PORT.println("Auth Failed");
+      else if (error == OTA_BEGIN_ERROR) DEBUG_PORT.println("Begin Failed");
+      else if (error == OTA_CONNECT_ERROR) DEBUG_PORT.println("Connect Failed");
+      else if (error == OTA_RECEIVE_ERROR) DEBUG_PORT.println("Receive Failed");
+      else if (error == OTA_END_ERROR) DEBUG_PORT.println("End Failed");
+    });
+    ArduinoOTA.begin();
+  }
+  else {
+    // Put modem to sleep
+    WiFi.mode(WIFI_OFF);
+    btStop();
+  }
 
   tft.fillRect(0, 120, 128, 8, ST7735_BLACK);
   // Initialize SD Card.
@@ -466,7 +457,7 @@ void loop() {
   buttonOne_lastState = buttonOne_reading;
   buttonTwo_lastState = buttonTwo_reading;
 
-  // ArduinoOTA.handle();
+  ArduinoOTA.handle();
   
 }
 

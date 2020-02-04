@@ -142,7 +142,7 @@ void wifiInfoOptions() {
         currentOption = 0;
         break;
       case 1: // Config Portal
-        ESP_wifiManager.startConfigPortal();
+        // ESP_wifiManager.startConfigPortal();
         break;
       case 2: // Turn WiFi On/Off
         // Put modem to sleep
