@@ -21,7 +21,16 @@
 #include <DNSServer.h>
 #include <ESP_WiFiManager.h>
 #include "FS.h"
-#include "SD.h"
+
+#include <sd_defines.h>
+#include <SD.h>
+#include <sd_diskio.h>
+
+
+
+// #include "SD.h"
+
+
 #include <ArduinoOTA.h>
 #include <NMEAGPS.h>
 #include <Streamers.h>
@@ -72,11 +81,11 @@ Adafruit_ST7735 tft = Adafruit_ST7735(TFT_CS,  TFT_DC, TFT_RST);
 #define SEALEVELPRESSURE_HPA (1013.25)
 Adafruit_BME280 bme; // I2C
 int WEATHER_TEMP_UNITS = 0;
-
+bool bmePresent = false;
 
 // Setup mag sensor and variables
 Adafruit_HMC5883_Unified mag = Adafruit_HMC5883_Unified(12345);
-bool magPresent = true;
+bool magPresent = false;
 float headingDegrees, prevHeadingDegrees;
 const char *headingCardinal;
 int last_heading;
@@ -95,6 +104,9 @@ struct SAT_DATA satData[20];
 // Set GPS units (metric/imperial);
 int GPS_DISTANCE_UNITS = 0;
 int GPS_COORD_UNITS = 0;
+int GPS_SAMPLE_RATE[3] = {1, 5, 10};
+int currentGPSSampleRate = 0;
+int NUMBER_GPS_SAMPLE_RATES = 3;
 
 // Satellite display settings
 // Define Satellite map dimensions and location
@@ -102,9 +114,6 @@ int GPS_COORD_UNITS = 0;
 #define SATY 67
 #define SATR 50
 
-int GPS_SAMPLE_RATE[3] = {1, 5, 10};
-int currentGPSSampleRate = 0;
-int NUMBER_GPS_SAMPLE_RATES = 3;
 
 
 // Ublox configuration
@@ -164,6 +173,8 @@ bool menuWeatherConfig[4] = {false, false, false, false};
 
 
 bool logging = false;
+bool sdPresent = false;
+
 // SdFat sd;
 // SdFile logfile;
 
@@ -225,21 +236,50 @@ DEBUG_PORT.println(F("Init."));
 
 
   // Start mag sensoring
-  if (!mag.begin()) {
-    magPresent = false;
-    DEBUG_PORT.println(F("No magnetometer"));
-    tft.setCursor(1, 119);
-    tft.print("No magnetometer");
+  if (mag.begin()) {
+    magPresent = true;
+    DEBUG_PORT.println(F("Start magnetometer"));
   }
-
+  else {
+    DEBUG_PORT.println(F("Failed to initialize magnetometer"));
+    tft.setCursor(1, 119);
+    tft.print("No Magnetometer");
+  }
   // Initialize BME280 sensor
   unsigned bmeStatus;
   tft.setCursor(1, 119);
   bmeStatus = bme.begin(0x76);
-  if (!bmeStatus) {
-    DEBUG_PORT.println(F("BME Fail"));
-    tft.print(F("BME Fail"));
+  if (bmeStatus) {
+    bmePresent = true;
+    DEBUG_PORT.println(F("Start BME280"));
   }
+  else {
+    DEBUG_PORT.println(F("Failed to initialize BME280"));
+    tft.print(F("No BME280"));
+  }
+
+
+  tft.fillRect(0, 120, 128, 8, ST7735_BLACK);
+  // Initialize SD Card.
+  tft.setCursor(1, 111);
+  if (SD.begin(SD_CS)) {
+    sdPresent = true;
+    DEBUG_PORT.println("Start SD reader");
+  }
+  else {
+    DEBUG_PORT.println("Failed to initialize SD card reader");
+    tft.print(F("No SD reader"));
+  }
+  uint8_t cardType = SD.cardType();
+
+  // tft.setCursor(1, 120);
+  // tft.print(F("Logging: "));
+  // if (logging) {
+  //   tft.print(F("on"));
+  // }
+  // else {
+  //   tft.print(F("off"));
+  // }
 
   // ESP_WiFiManager ESP_wifiManager((const char *) ssid.c_str());
 
@@ -299,7 +339,7 @@ DEBUG_PORT.println(F("Init."));
       tft.setTextColor(ST7735_WHITE, ST7735_BLACK);
       tft.setCursor(2, 120);
       tft.print(F("Updating firmware: "));
-      });
+    });
     ArduinoOTA.onEnd([]() {
       // DEBUG_PORT.println("\nEnd");
       tft.fillRect(0, 120, 127, 7, ST7735_BLACK);
@@ -330,23 +370,6 @@ DEBUG_PORT.println(F("Init."));
     btStop();
   }
 
-  tft.fillRect(0, 120, 128, 8, ST7735_BLACK);
-  // Initialize SD Card.
-  tft.setCursor(1, 111);
-  if (!SD.begin()) {
-    Serial.println("Card Mount Failed");
-    return;
-  }
-  uint8_t cardType = SD.cardType();
-
-  // tft.setCursor(1, 120);
-  // tft.print(F("Logging: "));
-  // if (logging) {
-  //   tft.print(F("on"));
-  // }
-  // else {
-  //   tft.print(F("off"));
-  // }
 
   // // Get initial battery voltage
   // check_vbat(); 

@@ -30,13 +30,13 @@ static void createLogFile() {
   }
 } // createLogFile
 
-static void writeFloat(float v, SdFile &file, int precision) {
+static void writeFloat(float v, fs::FS &fs, int precision) {
   obufstream ob(buf, sizeof(buf));
   ob << setprecision(precision) << v;
   file.print(buf);
 } // writeFloat
 
-static void writeFormattedDatetime(gps_fix fix, SdFile &file) {
+static void writeFormattedDatetime(gps_fix fix, fs::FS &fs) {
   sprintf(
       buf,
       "20%0d-%02d-%02dT%02d:%02d:%02d.%03dZ",
