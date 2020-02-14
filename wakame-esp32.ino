@@ -22,9 +22,9 @@
 #include <ESP_WiFiManager.h>
 #include "FS.h"
 
-#include <sd_defines.h>
+// #include <sd_defines.h>
 #include <SD.h>
-#include <sd_diskio.h>
+// #include <sd_diskio.h>
 
 
 
@@ -70,8 +70,8 @@ float measured_vbat;
 // SPI configuration for LCD and SD card
 #define TFT_CS         21
 #define TFT_RST        -1
-#define TFT_DC         A1
-#define SD_CS          A0
+#define TFT_DC         25
+#define SD_CS          26
 Adafruit_ST7735 tft = Adafruit_ST7735(TFT_CS,  TFT_DC, TFT_RST);
 // Custom color definitions
 #define ST7735_DARKGREY 0xC618
@@ -177,7 +177,7 @@ bool sdPresent = false;
 
 // SdFat sd;
 // SdFile logfile;
-
+File logfile;
 // #define ESP_getChipId() (ESP.getEfuseMac())
 
 // SSID and PW for Config Portal
@@ -210,7 +210,7 @@ void setup() {
   DEBUG_PORT.begin(115200);
   // Configure GPS
   GPS_PORT.begin(GPSBaud);
-DEBUG_PORT.println(F("Init."));
+  DEBUG_PORT.println(F("Init."));
 
   // GPS_PORT.print( F("$PUBX,41,1,0007,0003,115200,0*25\r\n") ); // Increase baud rate
   // programGPS(UBLOX_INIT);

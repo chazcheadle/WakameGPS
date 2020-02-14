@@ -175,15 +175,16 @@ static void gpsDataOptions() {
         tft.setTextColor(ST7735_BLACK, ST7735_WHITE);
         tft.setCursor(120, 2);
         if (logging) {
-          // logfile.close();
+          logfile.close();
           tft.print(F(" "));
           // Turn off logging to SD card.
-          // DEBUG_PORT.println(F("Logging stopped"));
+          DEBUG_PORT.println(F("Logging stopped"));
           logging = false;
         }
         else {
           tft.print(F("L"));
-          // createLogFile();
+          createLogFile();
+          DEBUG_PORT.println(F("Logging started"));
         }
         tft.fillRect(0, 11, 128, 107, ST7735_BLACK);
         configPage[GPS_DATA_SCREEN] = false;
